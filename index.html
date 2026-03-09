@@ -1,0 +1,980 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escape da Escola Assombrada - Desafio de Lógica</title>
+    <style>
+        body {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f0f23 100%);
+            min-height: 100vh;
+            color: #e0e0e0;
+        }
+
+        .game-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            background: rgba(20, 20, 40, 0.9);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(139, 69, 19, 0.3);
+        }
+
+        .header h1 {
+            color: #ff6b6b;
+            margin: 0 0 10px 0;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 8px rgba(255, 0, 0, 0.3);
+        }
+
+        .story-intro {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+            border: 1px solid rgba(139, 69, 19, 0.4);
+            text-align: left;
+        }
+
+        .story-intro p {
+            margin: 10px 0;
+            line-height: 1.6;
+            font-size: 1em;
+        }
+
+        .story-intro em {
+            color: #ff9f43;
+            font-style: italic;
+        }
+
+        .progress-bar {
+            background: rgba(20, 20, 40, 0.8);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(139, 69, 19, 0.3);
+        }
+
+        .progress-track {
+            background: #2c2c54;
+            height: 8px;
+            border-radius: 4px;
+            position: relative;
+            margin-bottom: 15px;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #8b4513, #cd853f);
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        .rooms-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .room-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .room-badge.completed {
+            background: #27ae60;
+            color: white;
+        }
+
+        .room-badge.current {
+            background: #f39c12;
+            color: white;
+            animation: pulse 2s infinite;
+        }
+
+        .room-badge.locked {
+            background: #95a5a6;
+            color: white;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .room-container {
+            background: rgba(20, 20, 40, 0.9);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            border: 1px solid rgba(139, 69, 19, 0.3);
+            display: none;
+        }
+
+        .room-container.active {
+            display: block;
+            animation: slideIn 0.5s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .room-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .room-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
+
+        .room-title {
+            color: #ff6b6b;
+            font-size: 2em;
+            margin: 0 0 10px 0;
+            text-shadow: 2px 2px 4px rgba(255, 0, 0, 0.3);
+        }
+
+        .room-description {
+            color: #cccccc;
+            font-size: 1.1em;
+            margin: 0;
+        }
+
+        .challenges-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .challenge-box {
+            background: rgba(30, 30, 50, 0.8);
+            border-left: 5px solid #8b4513;
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid rgba(139, 69, 19, 0.2);
+        }
+
+        .challenge-title {
+            color: #ff9f43;
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .code-block {
+            background: #2c3e50;
+            color: #ecf0f1;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            line-height: 1.8;
+            margin: 15px 0;
+            overflow-x: auto;
+            white-space: pre-line;
+        }
+
+        .answer-section {
+            margin-top: 20px;
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #8b4513;
+            border-radius: 8px;
+            font-size: 1em;
+            margin-bottom: 10px;
+            transition: border-color 0.3s ease;
+            background: rgba(40, 40, 60, 0.8);
+            color: #e0e0e0;
+            box-sizing: border-box;
+        }
+
+        .answer-input:focus {
+            outline: none;
+            border-color: #ff9f43;
+            box-shadow: 0 0 10px rgba(255, 159, 67, 0.3);
+        }
+
+        .answer-input.correct {
+            border-color: #27ae60;
+            background: rgba(39, 174, 96, 0.1);
+        }
+
+        .lock-section {
+            background: rgba(40, 40, 60, 0.9);
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            border: 2px solid #8b4513;
+        }
+
+        .lock-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
+            transition: all 0.5s ease;
+        }
+
+        .lock-icon.locked {
+            color: #e74c3c;
+        }
+
+        .lock-icon.unlocked {
+            color: #27ae60;
+            animation: unlock 0.5s ease;
+        }
+
+        @keyframes unlock {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+
+        .lock-status {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .lock-status.locked {
+            color: #e74c3c;
+        }
+
+        .lock-status.unlocked {
+            color: #27ae60;
+        }
+
+        .progress-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .progress-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #95a5a6;
+            transition: all 0.3s ease;
+        }
+
+        .progress-dot.completed {
+            background: #27ae60;
+            transform: scale(1.1);
+        }
+
+        .next-btn {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .next-btn.enabled {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .next-btn.enabled:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+        }
+
+        .feedback {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            text-align: center;
+            font-size: 0.9em;
+            display: none;
+        }
+
+        .feedback.success {
+            background: #d5f4e6;
+            color: #27ae60;
+            border: 2px solid #27ae60;
+        }
+
+        .feedback.error {
+            background: #fadbd8;
+            color: #e74c3c;
+            border: 2px solid #e74c3c;
+        }
+
+        .victory-screen {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 50px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: none;
+        }
+
+        .victory-screen.show {
+            display: block;
+            animation: celebrationBounce 1s ease;
+        }
+
+        @keyframes celebrationBounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-20px); }
+            60% { transform: translateY(-10px); }
+        }
+
+        .victory-icon {
+            font-size: 5em;
+            margin-bottom: 20px;
+            animation: spin 2s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 768px) {
+            .game-container {
+                padding: 10px;
+            }
+            
+            .header {
+                padding: 20px;
+            }
+            
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .challenges-container {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .room-container {
+                padding: 15px;
+            }
+            
+            .room-icon {
+                font-size: 3em;
+            }
+            
+            .room-title {
+                font-size: 1.5em;
+            }
+            
+            .rooms-list {
+                gap: 6px;
+            }
+            
+            .room-badge {
+                font-size: 0.7em;
+                padding: 5px 10px;
+            }
+            
+            .challenge-box {
+                padding: 15px;
+            }
+            
+            .code-block {
+                font-size: 0.8em;
+                padding: 15px;
+            }
+            
+            .answer-input {
+                padding: 10px;
+                font-size: 0.9em;
+            }
+            
+            .lock-section {
+                padding: 20px;
+            }
+            
+            .lock-icon {
+                font-size: 2.5em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.5em;
+            }
+            
+            .room-badge {
+                font-size: 0.6em;
+                padding: 4px 8px;
+            }
+            
+            .room-icon {
+                font-size: 2.5em;
+            }
+            
+            .room-title {
+                font-size: 1.3em;
+            }
+            
+            .code-block {
+                font-size: 0.75em;
+            }
+            
+            .challenge-title {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="header">
+            <h1>🏚️ Escape da Escola Assombrada</h1>
+            <div class="story-intro">
+                <p><strong>📖 A História:</strong></p>
+                <p>Era uma noite tempestuosa de sexta-feira quando você decidiu voltar à escola para pegar um livro esquecido. Ao entrar no prédio vazio, as portas se fecharam atrás de você com um estrondo sinistro. As luzes piscaram e uma voz fantasmagórica ecoou pelos corredores:</p>
+                <p><em>"Bem-vindo à Escola Amaldiçoada de São Benedito... Há 50 anos, um terrível acidente aconteceu aqui durante uma aula de programação. O professor e seus alunos ficaram presos para sempre, condenados a repetir eternamente suas lições de Portugol..."</em></p>
+                <p><strong>🎯 Sua Missão:</strong> Resolva AMBOS os enigmas de cada sala para quebrar o cadeado e escapar antes que você também se torne parte da escola para sempre!</p>
+            </div>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-track">
+                <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+            </div>
+            <div class="rooms-list">
+                <span class="room-badge current" id="badge-0">👻 Sala Assombrada</span>
+                <span class="room-badge locked" id="badge-1">📚 Biblioteca dos Mortos</span>
+                <span class="room-badge locked" id="badge-2">⚗️ Lab. Maldito</span>
+                <span class="room-badge locked" id="badge-3">💀 Lab. Digital</span>
+                <span class="room-badge locked" id="badge-4">🍖 Cantina dos Horrores</span>
+            </div>
+        </div>
+
+        <!-- Sala de Aula -->
+        <div class="room-container active" id="room-0">
+            <div class="room-header">
+                <div class="room-icon">👻</div>
+                <h2 class="room-title">Sala de Aula Assombrada</h2>
+                <p class="room-description">O ar está gelado... As carteiras se movem sozinhas. No quadro negro, giz fantasmagórico escreve números que aparecem e desaparecem. Resolva AMBOS os enigmas para quebrar o cadeado!</p>
+            </div>
+            
+            <div class="challenges-container">
+                <div class="challenge-box">
+                    <div class="challenge-title">🧩 Desafio A: Operações Básicas</div>
+                    <p>Determine o valor final da variável <strong>resultado</strong>:</p>
+                    
+                    <div class="code-block">programa {
+    funcao inicio() {
+        inteiro a = 10
+        inteiro b = 5  
+        inteiro c = 3
+        inteiro resultado
+        
+        resultado = a + b * c - 2
+        
+        escreva("Resultado: ", resultado)
+    }
+}</div>
+                    
+                    <div class="answer-section">
+                        <input type="number" class="answer-input" id="answer-0-0" placeholder="Valor de 'resultado'">
+                        <div class="feedback" id="feedback-0-0"></div>
+                    </div>
+                </div>
+
+                <div class="challenge-box">
+                    <div class="challenge-title">🔢 Desafio B: Incremento</div>
+                    <p>Qual será o valor final de <strong>contador</strong>?</p>
+                    
+                    <div class="code-block">programa {
+    funcao inicio() {
+        inteiro contador = 0
+        
+        contador = contador + 3
+        contador = contador * 2
+        contador = contador - 1
+        
+        escreva("Contador: ", contador)
+    }
+}</div>
+                    
+                    <div class="answer-section">
+                        <input type="number" class="answer-input" id="answer-0-1" placeholder="Valor de 'contador'">
+                        <div class="feedback" id="feedback-0-1"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lock-section">
+                <div class="lock-icon locked" id="lock-0">🔒</div>
+                <div class="lock-status locked" id="status-0">Cadeado Trancado</div>
+                <div class="progress-indicators">
+                    <div class="progress-dot" id="dot-0-0"></div>
+                    <div class="progress-dot" id="dot-0-1"></div>
+                </div>
+                <button class="next-btn" id="next-0" onclick="nextRoom()">Avançar para Próxima Sala</button>
+            </div>
+        </div>
+
+        <!-- Biblioteca -->
+        <div class="room-container" id="room-1">
+            <div class="room-header">
+                <div class="room-icon">📚</div>
+                <h2 class="room-title">Biblioteca dos Mortos</h2>
+                <p class="room-description">Livros se abrem sozinhos... Páginas voam pelo ar como borboletas fantasmagóricas. O fantasma do bibliotecário sussurra: "Complete ambos os enigmas condicionais..."</p>
+            </div>
+            
+            <div class="challenges-container">
+                <div class="challenge-box">
+                    <div class="challenge-title">📚 Desafio A: Condicionais</div>
+                    <p>O que será exibido na tela?</p>
+                    
+                    <div class="code-block">programa {
+    funcao inicio() {
+        inteiro idade = 16
+        
+        se (idade >= 18) {
+            escreva("Maior de idade")
+        } senao se (idade >= 13) {
+            escreva("Adolescente") 
+        } senao {
+            escreva("Criança")
+        }
+    }
+}</div>
+                    
+                    <div class="answer-section">
+                        <input type="text" class="answer-input" id="answer-1-0" placeholder="O que será exibido?">
+                        <div class="feedback" id="feedback-1-0"></div>
+                    </div>
+                </div>
+
+                <div class="challenge-box">
+                    <div class="challenge-title">🎯 Desafio B: Comparações</div>
+                    <p>Qual será o valor de <strong>resultado</strong>?</p>
+                    
+                    <div class="code-block">programa {
+    funcao inicio() {
+        inteiro x = 8
+        inteiro y = 12
+        inteiro resultado
+        
+        se (x > y) {
+            resultado = x + y
+        } senao {
+            resultado = y - x
+        }
+        
+        escreva("Resultado: ", resultado)
+    }
+}</div>
+                    
+                    <div class="answer-section">
+                        <input type="number" class="answer-input" id="answer-1-1" placeholder="Valor de 'resultado'">
+                        <div class="feedback" id="feedback-1-1"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lock-section">
+                <div class="lock-icon locked" id="lock-1">🔒</div>
+                <div class="lock-status locked" id="status-1">Cadeado Trancado</div>
+                <div class="progress-indicators">
+                    <div class="progress-dot" id="dot-1-0"></div>
+                    <div class="progress-dot" id="dot-1-1"></div>
+                </div>
+                <button class="next-btn" id="next-1" onclick="nextRoom()">Avançar para Próxima Sala</button>
+            </div>
+        </div>
+
+        <!-- Laboratório -->
+        <div class="room-container" id="room-2">
+            <div class="room-header">
+                <div class="room-icon">⚗️</div>
+                <h2 class="room-title">Laboratório Maldito</h2>
+                <p class="room-description">Tubos de ensaio borbulham... Esqueletos se movem nas prateleiras. O espírito do professor ri: "Resolva meus experimentos de repetição!"</p>
+            </div>
+            
+            <div class="challenges-container">
+                <div class="challenge-box">
+                    <div class="challenge-title">🔬 Desafio A: Loop Simples</div>
+                    <p>Quantos números serão exibidos?</p>
+                    
+                    <div class="code-block">programa {
+    funcao inicio() {
+        para (inteiro i = 2; i <= 10; i = i + 2) {
+            escreva(i, " ")
+        }
+    }
+}</div>
+                    
+                    <div class="answer-section">
+                        <input type="number" class="answer-input" id="answer-2-0" placeholder="Quantos números?">
+                        <div class="feedback" id="feedback-2-0"></div>
+                    </div>
+                </div>
+
+                <div class="challenge-box">
+                    <div class="challenge-title">🧪 Desafio B: Acumulador</div>
+                    <p>Qual será o valor final de <strong>soma</strong>?</p>
+                    
+                    <div class="code-block">programa {
+    funcao inicio() {
+        inteiro soma = 0
+        
+        para (inteiro i = 1; i <= 4; i++) {
+            soma = soma + i * 2
+        }
+        
+        escreva("Soma: ", soma)
+    }
+}</div>
+                    
+                    <div class="answer-section">
+                        <input type="number" class="answer-input" id="answer-2-1" placeholder="Valor de 'soma'">
+                        <div class="feedback" id="feedback-2-1"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lock-section">
+                <div class="lock-icon locked" id="lock-2">🔒</div>
+                <div class="lock-status locked" id="status-2">Cadeado Trancado</div>
+                <div class="progress-indicators">
+                    <div class="progress-dot" id="dot-2-0"></div>
+                    <div class="progress-dot" id="dot-2-1"></div>
+                </div>
+                <button class="next-btn" id="next-2" onclick="nextRoom()">Avançar para Próxima Sala</button>
+            </div>
+        </div>
+
+        <!-- Laboratório de Informática -->
+        <div class="room-container" id="room-3">
+            <div class="room-header">
+                <div class="room-icon">💀</div>
+                <h2 class="room-title">Laboratório Digital Assombrado</h2>
+                <p class="room-description">Computadores ligam sozinhos... Telas piscam com códigos sinistros. Uma voz eletrônica ecoa: "Complete meus algoritmos de vetores!"</p>
+            </div>
+            
+            <div class="challenges-container">
+                <div class="challenge-box">
+                    <div class="challenge-title">💾 Desafio A: Soma de Vetor</div>
+                    <p>Qual será o valor da soma?</p>
+                    
+                    <div class="code-block">programa {
+    funcao inicio() {
+        inteiro numeros[5] = {10, 20, 30, 40, 50}
+        inteiro soma = 0
+        
+        para (inteiro i = 0; i < 5; i++) {
+            soma = soma + numeros[i]
+        }
+        
+        escreva("Soma: ", soma)
+    }
+}</div>
+                    
+                    <div class="answer-section">
+                        <input type="number" class="answer-input" id="answer-3-0" placeholder="Valor da soma">
+                        <div class="feedback" id="feedback-3-0"></div>
+                    </div>
+                </div>
+
+                <div class="challenge-box">
+                    <div class="challenge-title">🔍 Desafio B: Busca no Vetor</div>
+                    <p>Qual será o valor de <strong>posicao</strong>?</p>
+                    
+                    <div class="code-block">programa {
+    funcao inicio() {
+        inteiro valores[4] = {5, 10, 15, 20}
+        inteiro posicao = -1
+        
+        para (inteiro i = 0; i < 4; i++) {
+            se (valores[i] == 15) {
+                posicao = i
+            }
+        }
+        
+        escreva("Posição: ", posicao)
+    }
+}</div>
+                    
+                    <div class="answer-section">
+                        <input type="number" class="answer-input" id="answer-3-1" placeholder="Valor de 'posicao'">
+                        <div class="feedback" id="feedback-3-1"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lock-section">
+                <div class="lock-icon locked" id="lock-3">🔒</div>
+                <div class="lock-status locked" id="status-3">Cadeado Trancado</div>
+                <div class="progress-indicators">
+                    <div class="progress-dot" id="dot-3-0"></div>
+                    <div class="progress-dot" id="dot-3-1"></div>
+                </div>
+                <button class="next-btn" id="next-3" onclick="nextRoom()">Avançar para Próxima Sala</button>
+            </div>
+        </div>
+
+        <!-- Cantina -->
+        <div class="room-container" id="room-4">
+            <div class="room-header">
+                <div class="room-icon">🍖</div>
+                <h2 class="room-title">Cantina dos Horrores - Desafio Final</h2>
+                <p class="room-description">Panelas fervem com ingredientes misteriosos... O fantasma da merendeira surge: "Este é o teste final! Resolva ambos os enigmas de funções para escapar!"</p>
+            </div>
+            
+            <div class="challenges-container">
+                <div class="challenge-box">
+                    <div class="challenge-title">🍕 Desafio A: Função Simples</div>
+                    <p>Qual será o resultado exibido?</p>
+                    
+                    <div class="code-block">programa {
+    funcao inteiro calcular(inteiro x, inteiro y) {
+        retorne x * y + 5
+    }
+    
+    funcao inicio() {
+        inteiro resultado = calcular(3, 4)
+        escreva("Resultado: ", resultado)
+    }
+}</div>
+                    
+                    <div class="answer-section">
+                        <input type="number" class="answer-input" id="answer-4-0" placeholder="Resultado da função">
+                        <div class="feedback" id="feedback-4-0"></div>
+                    </div>
+                </div>
+
+                <div class="challenge-box">
+                    <div class="challenge-title">🔥 Desafio B: Função Recursiva</div>
+                    <p>Qual será o valor de <strong>total</strong>?</p>
+                    
+                    <div class="code-block">programa {
+    funcao inteiro fatorial(inteiro n) {
+        se (n <= 1) {
+            retorne 1
+        } senao {
+            retorne n * fatorial(n - 1)
+        }
+    }
+    
+    funcao inicio() {
+        inteiro total = fatorial(4)
+        escreva("Total: ", total)
+    }
+}</div>
+                    
+                    <div class="answer-section">
+                        <input type="number" class="answer-input" id="answer-4-1" placeholder="Valor de 'total'">
+                        <div class="feedback" id="feedback-4-1"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lock-section">
+                <div class="lock-icon locked" id="lock-4">🔒</div>
+                <div class="lock-status locked" id="status-4">Cadeado Final Trancado</div>
+                <div class="progress-indicators">
+                    <div class="progress-dot" id="dot-4-0"></div>
+                    <div class="progress-dot" id="dot-4-1"></div>
+                </div>
+                <button class="next-btn" id="next-4" onclick="showVictory()">🎉 ESCAPAR DA ESCOLA!</button>
+            </div>
+        </div>
+
+        <!-- Tela de Vitória -->
+        <div class="victory-screen" id="victoryScreen">
+            <div class="victory-icon">🎉</div>
+            <h1 style="color: #27ae60; margin-bottom: 20px;">PARABÉNS!</h1>
+            <h2 style="color: #2c3e50; margin-bottom: 30px;">Você escapou da escola!</h2>
+            <p style="font-size: 1.2em; color: #7f8c8d; margin-bottom: 30px;">
+                Você demonstrou excelente conhecimento em lógica de programação com Portugol! 
+                Todos os cadeados foram quebrados com sucesso.
+            </p>
+            <p style="font-size: 1.1em; color: #27ae60; font-weight: 600;">
+                🏆 Missão Completa: 5/5 salas desbloqueadas!
+            </p>
+            <p style="font-size: 1em; color: #2c3e50; margin-top: 20px;">
+                A maldição foi quebrada! As almas dos estudantes e professores finalmente encontraram paz. Você conseguiu escapar da Escola Amaldiçoada!
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Respostas corretas para cada sala [questão A, questão B]
+        const answers = [
+            [23, 5],      // Sala 0: operações básicas
+            ["Adolescente", 4],  // Sala 1: condicionais
+            [5, 20],      // Sala 2: loops
+            [150, 2],     // Sala 3: vetores
+            [17, 24]      // Sala 4: funções
+        ];
+        
+        let currentRoom = 0;
+        const totalRooms = 5;
+        let roomProgress = [
+            [false, false], // Sala 0
+            [false, false], // Sala 1
+            [false, false], // Sala 2
+            [false, false], // Sala 3
+            [false, false]  // Sala 4
+        ];
+
+        // Adicionar event listeners para todas as respostas
+        document.addEventListener('DOMContentLoaded', function() {
+            for (let room = 0; room < totalRooms; room++) {
+                for (let question = 0; question < 2; question++) {
+                    const input = document.getElementById(`answer-${room}-${question}`);
+                    if (input) {
+                        input.addEventListener('input', () => checkAnswer(room, question));
+                        input.addEventListener('keypress', (e) => {
+                            if (e.key === 'Enter') {
+                                checkAnswer(room, question);
+                            }
+                        });
+                    }
+                }
+            }
+        });
+
+        function checkAnswer(roomIndex, questionIndex) {
+            const input = document.getElementById(`answer-${roomIndex}-${questionIndex}`);
+            const feedback = document.getElementById(`feedback-${roomIndex}-${questionIndex}`);
+            const dot = document.getElementById(`dot-${roomIndex}-${questionIndex}`);
+            const userAnswer = input.value.trim();
+            
+            let isCorrect = false;
+            const correctAnswer = answers[roomIndex][questionIndex];
+            
+            if (typeof correctAnswer === 'string') {
+                isCorrect = userAnswer.toLowerCase() === correctAnswer.toLowerCase();
+            } else {
+                isCorrect = parseInt(userAnswer) === correctAnswer;
+            }
+            
+            if (isCorrect) {
+                feedback.className = 'feedback success';
+                feedback.textContent = '✅ Correto!';
+                feedback.style.display = 'block';
+                input.classList.add('correct');
+                dot.classList.add('completed');
+                roomProgress[roomIndex][questionIndex] = true;
+                
+                setTimeout(() => {
+                    feedback.style.display = 'none';
+                }, 2000);
+            } else if (userAnswer !== '') {
+                feedback.className = 'feedback error';
+                feedback.textContent = '❌ Incorreto!';
+                feedback.style.display = 'block';
+                input.classList.remove('correct');
+                dot.classList.remove('completed');
+                roomProgress[roomIndex][questionIndex] = false;
+                
+                setTimeout(() => {
+                    feedback.style.display = 'none';
+                }, 2000);
+            } else {
+                feedback.style.display = 'none';
+                input.classList.remove('correct');
+                dot.classList.remove('completed');
+                roomProgress[roomIndex][questionIndex] = false;
+            }
+            
+            updateLockStatus(roomIndex);
+        }
+
+        function updateLockStatus(roomIndex) {
+            const lock = document.getElementById(`lock-${roomIndex}`);
+            const status = document.getElementById(`status-${roomIndex}`);
+            const nextBtn = document.getElementById(`next-${roomIndex}`);
+            
+            const bothCorrect = roomProgress[roomIndex][0] && roomProgress[roomIndex][1];
+            
+            if (bothCorrect) {
+                lock.className = 'lock-icon unlocked';
+                lock.textContent = '🔓';
+                status.className = 'lock-status unlocked';
+                status.textContent = 'Cadeado Desbloqueado!';
+                nextBtn.classList.add('enabled');
+            } else {
+                lock.className = 'lock-icon locked';
+                lock.textContent = '🔒';
+                status.className = 'lock-status locked';
+                status.textContent = roomIndex === totalRooms - 1 ? 'Cadeado Final Trancado' : 'Cadeado Trancado';
+                nextBtn.classList.remove('enabled');
+            }
+        }
+
+        function nextRoom() {
+            if (!roomProgress[currentRoom][0] || !roomProgress[currentRoom][1]) {
+                return; // Não avança se ambas questões não estão corretas
+            }
+            
+            // Marcar sala atual como completa
+            const currentBadge = document.getElementById(`badge-${currentRoom}`);
+            currentBadge.className = 'room-badge completed';
+            
+            // Esconder sala atual
+            const currentRoomElement = document.getElementById(`room-${currentRoom}`);
+            currentRoomElement.classList.remove('active');
+            
+            currentRoom++;
+            
+            // Atualizar barra de progresso
+            const progress = (currentRoom / totalRooms) * 100;
+            document.getElementById('progressFill').style.width = `${progress}%`;
+            
+            if (currentRoom < totalRooms) {
+                // Mostrar próxima sala
+                const nextRoomElement = document.getElementById(`room-${currentRoom}`);
+                nextRoomElement.classList.add('active');
+                
+                // Atualizar badge da próxima sala
+                const nextBadge = document.getElementById(`badge-${currentRoom}`);
+                nextBadge.className = 'room-badge current';
+            }
+        }
+
+        function showVictory() {
+            if (!roomProgress[currentRoom][0] || !roomProgress[currentRoom][1]) {
+                return; // Não mostra vitória se ambas questões não estão corretas
+            }
+            
+            document.getElementById('victoryScreen').classList.add('show');
+        }
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'987daf2e834badd3',t:'MTc1OTMzOTc4OC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
